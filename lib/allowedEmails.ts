@@ -1,6 +1,13 @@
 // Whitelist of emails allowed to access the MBAT dashboard.
 // Update this list with the internal MBAT / school addresses.
-export const allowedEmails: string[] = ["salome.mabuse@hec.edu"];
+export const allowedEmails: string[] = ["salome.mabuse@hec.edu"]
+export const allowedEmails: string[] = [
+  "salome.mabuse@hec.edu",
+  "association.mbat@hec.edu",
+  "mishel.andrasuna@hec.edu",
+];
+
+
 
 export const isEmailAllowed = (email: string | null | undefined): boolean => {
   if (!email) return false;
