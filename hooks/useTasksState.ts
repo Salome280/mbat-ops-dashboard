@@ -24,7 +24,7 @@ export type SectionState = {
   sponsorship: SponsorshipTask[];
 };
 
-const REVENUE_TARGET = 200_000;
+const REVENUE_TARGET = 850_000;
 
 const nowIso = () => new Date().toISOString();
 
@@ -32,9 +32,11 @@ const createBaseTask = (
   section: Exclude<TaskSection, "Dashboard Summary">,
   overrides: Partial<AnyTask> = {}
 ): AnyTask => {
-  const base: CommonTask = {
+  // IMPORTANT: never allow overrides to change `section`
+  const { section: _overrideSection, ...overridesNoSection } = overrides as any;
+
+  const baseCommonNoSection: Omit<CommonTask, "section"> = {
     id: crypto.randomUUID(),
-    section,
     title: "",
     status: "Not Started",
     priority: "Medium",
@@ -44,20 +46,31 @@ const createBaseTask = (
 
   if (section === "Sponsorship") {
     const s: SponsorshipTask = {
-      ...(base as CommonTask),
-      section: "Sponsorship",
+      ...baseCommonNoSection,
       pipelineStage: "Identified",
       dealValue: 0,
       contactName: "",
       probability: 0,
       expectedRevenue: 0,
       company: "",
-      ...overrides
+      // apply overrides (without section)
+      ...(overridesNoSection as Partial<SponsorshipTask>),
+      // set section LAST as a literal so TS keeps it as "Sponsorship"
+      section: "Sponsorship",
+      updatedAt: nowIso()
     };
+
     return s;
   }
 
-  return { ...base, ...overrides };
+  const c: CommonTask = {
+    ...baseCommonNoSection,
+    ...(overridesNoSection as Partial<CommonTask>),
+    section,
+    updatedAt: nowIso()
+  };
+
+  return c;
 };
 
 export const useTasksState = () => {
@@ -111,13 +124,9 @@ export const useTasksState = () => {
         sponsorship: [...prev.sponsorship]
       };
 
-      const updateArray = (
-        arr: AnyTask[]
-      ): AnyTask[] => {
+      const updateArray = (arr: AnyTask[]): AnyTask[] => {
         const idx = arr.findIndex(t => t.id === task.id);
-        if (idx === -1) {
-          return [...arr, { ...task, updatedAt: nowIso() }];
-        }
+        if (idx === -1) return [...arr, { ...task, updatedAt: nowIso() }];
         const next = [...arr];
         next[idx] = { ...task, updatedAt: nowIso() };
         return next;
@@ -125,16 +134,16 @@ export const useTasksState = () => {
 
       switch (task.section) {
         case "Marketing Communication":
-          copy.marketing = updateArray(copy.marketing);
+          copy.marketing = updateArray(copy.marketing) as CommonTask[];
           break;
         case "Merchandise":
-          copy.merchandise = updateArray(copy.merchandise);
+          copy.merchandise = updateArray(copy.merchandise) as CommonTask[];
           break;
         case "Finance and Legal":
-          copy.financeLegal = updateArray(copy.financeLegal);
+          copy.financeLegal = updateArray(copy.financeLegal) as CommonTask[];
           break;
         case "School Relationships":
-          copy.schoolRelationships = updateArray(copy.schoolRelationships);
+          copy.schoolRelationships = updateArray(copy.schoolRelationships) as CommonTask[];
           break;
         case "Sponsorship":
           copy.sponsorship = updateArray(copy.sponsorship) as SponsorshipTask[];
@@ -187,43 +196,29 @@ export const useTasksState = () => {
         sponsorship: [...prev.sponsorship]
       };
 
-      const updateForArray = <T extends AnyTask>(
-        arr: T[],
-        update: (task: T) => T
-      ): T[] =>
+      const updateForArray = <T extends AnyTask>(arr: T[], update: (task: T) => T): T[] =>
         arr.map(t => (t.id === taskId ? update(t) : t));
 
       if (section === "Sponsorship") {
         copy.sponsorship = updateForArray(copy.sponsorship, t => ({
           ...t,
-          pipelineStage: targetColumn as SponsorshipPipelineStage
+          pipelineStage: targetColumn as SponsorshipPipelineStage,
+          updatedAt: nowIso()
         })) as SponsorshipTask[];
       } else {
         const status = targetColumn as TaskStatus;
         switch (section) {
           case "Marketing Communication":
-            copy.marketing = updateForArray(copy.marketing, t => ({
-              ...t,
-              status
-            })) as CommonTask[];
+            copy.marketing = updateForArray(copy.marketing, t => ({ ...t, status, updatedAt: nowIso() })) as CommonTask[];
             break;
           case "Merchandise":
-            copy.merchandise = updateForArray(copy.merchandise, t => ({
-              ...t,
-              status
-            })) as CommonTask[];
+            copy.merchandise = updateForArray(copy.merchandise, t => ({ ...t, status, updatedAt: nowIso() })) as CommonTask[];
             break;
           case "Finance and Legal":
-            copy.financeLegal = updateForArray(copy.financeLegal, t => ({
-              ...t,
-              status
-            })) as CommonTask[];
+            copy.financeLegal = updateForArray(copy.financeLegal, t => ({ ...t, status, updatedAt: nowIso() })) as CommonTask[];
             break;
           case "School Relationships":
-            copy.schoolRelationships = updateForArray(copy.schoolRelationships, t => ({
-              ...t,
-              status
-            })) as CommonTask[];
+            copy.schoolRelationships = updateForArray(copy.schoolRelationships, t => ({ ...t, status, updatedAt: nowIso() })) as CommonTask[];
             break;
         }
       }
@@ -234,12 +229,12 @@ export const useTasksState = () => {
 
   const summary = useMemo(() => {
     const sponsorship = sections.sponsorship;
-    const totalSponsorsConfirmed = sponsorship.filter(
-      t => t.pipelineStage === "Confirmed"
-    ).length;
+    const totalSponsorsConfirmed = sponsorship.filter(t => t.pipelineStage === "Confirmed").length;
+
     const revenueSecured = sponsorship
       .filter(t => t.pipelineStage === "Confirmed")
       .reduce((sum, t) => sum + t.dealValue, 0);
+
     const pipelineExpectedRevenue = sponsorship.reduce(
       (sum, t) => sum + (t.expectedRevenue ?? (t.dealValue * (t.probability ?? 0)) / 100),
       0
@@ -255,6 +250,7 @@ export const useTasksState = () => {
 
     const now = new Date();
     const in14Days = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+
     const upcomingDeadlines = allTasks
       .filter(t => t.deadline)
       .filter(t => {
