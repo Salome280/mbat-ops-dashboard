@@ -6,12 +6,10 @@ import { SummaryDashboard } from "@/components/SummaryDashboard";
 import { SectionBoard } from "@/components/SectionBoard";
 import { useTasksState } from "@/hooks/useTasksState";
 import { AnyTask, TaskSection } from "@/types/tasks";
-import { AuthGuard } from "@/components/AuthGuard";
 
 export default function HomePage() {
   const [activeSection, setActiveSection] = useState<TaskSection>("Dashboard Summary");
-  const { sections, summary, upsertTask, deleteTask, moveTaskInBoard } =
-    useTasksState();
+  const { sections, summary, upsertTask, deleteTask, moveTaskInBoard } = useTasksState();
 
   const renderSection = () => {
     if (activeSection === "Dashboard Summary") {
@@ -27,10 +25,7 @@ export default function HomePage() {
       );
     }
 
-    const map: Record<
-      Exclude<TaskSection, "Dashboard Summary">,
-      AnyTask[]
-    > = {
+    const map: Record<Exclude<TaskSection, "Dashboard Summary">, AnyTask[]> = {
       "Marketing Communication": sections.marketing,
       Merchandise: sections.merchandise,
       "Finance and Legal": sections.financeLegal,
@@ -52,10 +47,8 @@ export default function HomePage() {
   };
 
   return (
-    <AuthGuard>
-      <LayoutShell activeSection={activeSection} onSectionChange={setActiveSection}>
-        {renderSection()}
-      </LayoutShell>
-    </AuthGuard>
+    <LayoutShell activeSection={activeSection} onSectionChange={setActiveSection}>
+      {renderSection()}
+    </LayoutShell>
   );
 }
