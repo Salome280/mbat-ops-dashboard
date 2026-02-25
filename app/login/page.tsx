@@ -4,11 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
 import { isEmailAllowed } from "@/lib/allowedEmails";
-import {
-  completeSignInFromLink,
-  isMagicLink,
-  sendMagicLink
-} from "@/lib/auth";
+import { completeSignInFromLink, isMagicLink, sendMagicLink } from "@/lib/auth";
 
 const getErrorMessage = (err: unknown): string => {
   if (err && typeof err === "object" && "message" in err) {
@@ -44,14 +40,9 @@ export default function LoginPage() {
   }, [router]);
 
   useEffect(() => {
-    const url =
-      typeof window !== "undefined" ? window.location.href : undefined;
-    if (!url) {
-      setCheckingLink(false);
-      return;
-    }
+    const url = typeof window !== "undefined" ? window.location.href : undefined;
 
-    if (!isMagicLink(url)) {
+    if (!url || !isMagicLink(url)) {
       setCheckingLink(false);
       return;
     }
@@ -73,7 +64,7 @@ export default function LoginPage() {
     setError(null);
     setInfo(null);
 
-    const trimmed = email.trim();
+    const trimmed = email.trim().toLowerCase();
 
     if (!trimmed) {
       setError("Please enter your email.");
@@ -81,9 +72,7 @@ export default function LoginPage() {
     }
 
     if (!isEmailAllowed(trimmed)) {
-      setError(
-        "This email is not authorized to access the MBAT Operations Dashboard."
-      );
+      setError("This email is not authorized to access the MBAT Operations Dashboard.");
       return;
     }
 
@@ -91,9 +80,7 @@ export default function LoginPage() {
       setSending(true);
       await sendMagicLink(trimmed);
       setSent(true);
-      setInfo(
-        "Magic sign-in link sent. Check your inbox and open the link on this device."
-      );
+      setInfo("Magic sign-in link sent. Check your inbox and open the link on this device.");
     } catch (err) {
       console.error("Magic link error:", err);
       setError(getErrorMessage(err));
@@ -110,21 +97,14 @@ export default function LoginPage() {
             MB
           </div>
           <div>
-            <p className="text-sm font-semibold text-gray-900">
-              MBAT Operations
-            </p>
-            <p className="text-xs text-gray-500">
-              Internal access · localhost only
-            </p>
+            <p className="text-sm font-semibold text-gray-900">MBAT Operations</p>
+            <p className="text-xs text-gray-500">Internal access · localhost only</p>
           </div>
         </div>
 
-        <h1 className="text-base font-semibold text-gray-900">
-          Sign in with magic link
-        </h1>
+        <h1 className="text-base font-semibold text-gray-900">Sign in with magic link</h1>
         <p className="mt-1 text-xs text-gray-500">
-          Enter your approved email address. We&apos;ll email you a one-time sign-in
-          link. No passwords, no public signup.
+          Enter your approved email address. We&apos;ll email you a one-time sign-in link. No passwords, no public signup.
         </p>
 
         {checkingLink && (
@@ -136,14 +116,12 @@ export default function LoginPage() {
         {!checkingLink && (
           <form onSubmit={handleSubmit} className="mt-4 space-y-4">
             <div>
-              <label className="mb-1 block text-xs font-medium text-gray-700">
-                Email
-              </label>
+              <label className="mb-1 block text-xs font-medium text-gray-700">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder="name@school.edu"
+                placeholder="name@hec.edu"
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none ring-accent/30 focus:border-accent focus:ring-2"
               />
             </div>
@@ -161,20 +139,18 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              disabled={sending}
+              disabled={sending || sent}
               className="flex w-full items-center justify-center rounded-md bg-accent px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-70"
             >
-              {sending ? "Sending link…" : "Send magic link"}
+              {sending ? "Sending link…" : sent ? "Link sent" : "Send magic link"}
             </button>
           </form>
         )}
 
         <p className="mt-4 text-[11px] text-gray-400">
-          By signing in you confirm this device is secure and used only for MBAT
-          operations. Access is restricted to whitelisted accounts.
+          By signing in you confirm this device is secure and used only for MBAT operations.
         </p>
       </div>
     </div>
   );
 }
-
