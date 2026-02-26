@@ -1,10 +1,6 @@
 "use client";
 
-import { signOut, onAuthStateChanged, User } from "firebase/auth";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { TaskSection } from "@/types/tasks";
-import { auth } from "@/lib/firebase";
 
 const SECTIONS: TaskSection[] = [
   "Dashboard Summary",
@@ -26,19 +22,11 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
   onSectionChange,
   children
 }) => {
-  const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, current => setUser(current));
-    return () => unsub();
-  }, []);
-
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Desktop sidebar */}
       <aside className="hidden w-64 flex-col border-r border-gray-200 bg-white px-4 py-6 lg:flex">
-        <div className="mb-6 flex items-center justify-between gap-2">
+        <div className="mb-8">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-white font-semibold">
               MB
@@ -50,17 +38,6 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
               <p className="text-xs text-gray-500">Internal dashboard</p>
             </div>
           </div>
-          {user && (
-            <button
-              onClick={async () => {
-                await signOut(auth);
-                router.replace("/login");
-              }}
-              className="rounded-full border border-gray-200 px-2 py-1 text-[11px] font-medium text-gray-600 hover:bg-gray-100"
-            >
-              Sign out
-            </button>
-          )}
         </div>
 
         <nav className="space-y-1">
@@ -94,17 +71,6 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
               </p>
               <p className="text-xs text-gray-500">Internal dashboard</p>
             </div>
-            {user && (
-              <button
-                onClick={async () => {
-                  await signOut(auth);
-                  router.replace("/login");
-                }}
-                className="rounded-full border border-gray-200 px-2 py-1 text-[11px] font-medium text-gray-600 hover:bg-gray-100"
-              >
-                Sign out
-              </button>
-            )}
           </div>
           <div className="flex overflow-x-auto border-t border-gray-100">
             {SECTIONS.map(section => {
