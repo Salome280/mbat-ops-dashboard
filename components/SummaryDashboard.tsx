@@ -6,6 +6,9 @@ interface SummaryProps {
   totalSponsorsConfirmed: number;
   revenueSecured: number;
   revenueTarget: number;
+  onRevenueTargetChange: (value: number) => void;
+  manualRevenueAdjustment: number;
+  onManualRevenueAdjustmentChange: (value: number) => void;
   pipelineExpectedRevenue: number;
   upcomingDeadlines: AnyTask[];
   highPriorityTasks: AnyTask[];
@@ -32,6 +35,9 @@ export const SummaryDashboard: React.FC<SummaryProps> = ({
   totalSponsorsConfirmed,
   revenueSecured,
   revenueTarget,
+  onRevenueTargetChange,
+  manualRevenueAdjustment,
+  onManualRevenueAdjustmentChange,
   pipelineExpectedRevenue,
   upcomingDeadlines,
   highPriorityTasks
@@ -74,13 +80,33 @@ export const SummaryDashboard: React.FC<SummaryProps> = ({
           <p className="mt-3 text-2xl font-semibold text-gray-900">
             {currency(revenueSecured)}
           </p>
+          {manualRevenueAdjustment !== 0 && (
+            <p className="mt-0.5 text-[11px] text-gray-500">
+              Includes manual adjustment
+            </p>
+          )}
           <p className="mt-1 text-xs text-gray-500">
-            Target {currency(revenueTarget)}
+            Target{" "}
+            <input
+              type="number"
+              value={revenueTarget}
+              onChange={e => onRevenueTargetChange(Number(e.target.value) || 0)}
+              className="w-24 rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-xs outline-none focus:border-accent focus:ring-1 focus:ring-accent/30"
+            />
           </p>
           <div className="mt-3 h-1.5 w-full rounded-full bg-gray-100">
             <div
               className="h-1.5 rounded-full bg-accent transition-all"
               style={{ width: `${securedPct}%` }}
+            />
+          </div>
+          <div className="mt-2 flex items-center gap-2">
+            <span className="text-[11px] text-gray-500">Manual adj:</span>
+            <input
+              type="number"
+              value={manualRevenueAdjustment}
+              onChange={e => onManualRevenueAdjustmentChange(Number(e.target.value) || 0)}
+              className="w-20 rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-xs outline-none focus:border-accent focus:ring-1 focus:ring-accent/30"
             />
           </div>
         </div>
@@ -94,6 +120,9 @@ export const SummaryDashboard: React.FC<SummaryProps> = ({
           </p>
           <p className="mt-1 text-xs text-gray-500">
             vs target {currency(revenueTarget)}
+            {manualRevenueAdjustment !== 0 && (
+              <span className="ml-1">(adj. {manualRevenueAdjustment >= 0 ? "+" : ""}{manualRevenueAdjustment.toLocaleString()})</span>
+            )}
           </p>
           <div className="mt-3 h-1.5 w-full rounded-full bg-gray-100">
             <div

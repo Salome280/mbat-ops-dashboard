@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   AnyTask,
   CommonTask,
@@ -8,6 +8,8 @@ import {
   TaskSection,
   TaskStatus
 } from "@/types/tasks";
+import { defaultSettings, STORAGE_KEY, type DashboardSettings } from "@/lib/settings";
+import { loadFromStorage, saveToStorage } from "@/lib/storage";
 
 export type SectionKey =
   | "marketing"
@@ -23,8 +25,6 @@ export type SectionState = {
   schoolRelationships: CommonTask[];
   sponsorship: SponsorshipTask[];
 };
-
-const REVENUE_TARGET = 850_000;
 
 const nowIso = () => new Date().toISOString();
 
@@ -74,6 +74,50 @@ const createBaseTask = (
 };
 
 export const useTasksState = () => {
+  const [settings, setSettings] = useState<DashboardSettings>(defaultSettings);
+
+  useEffect(() => {
+    const loaded = loadFromStorage(STORAGE_KEY, defaultSettings);
+    setSettings(loaded);
+  }, []);
+
+  useEffect(() => {
+    saveToStorage(STORAGE_KEY, settings);
+  }, [settings]);
+
+  const setRevenueTarget = (value: number) => {
+    setSettings(s => ({ ...s, revenueTarget: value }));
+  };
+  const setManualRevenueAdjustment = (value: number) => {
+    setSettings(s => ({ ...s, manualRevenueAdjustment: value }));
+  };
+  const addTeamMember = (name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    setSettings(s => ({
+      ...s,
+      teamMembers: [
+        ...s.teamMembers,
+        { id: crypto.randomUUID(), name: trimmed }
+      ]
+    }));
+  };
+  const updateTeamMember = (id: string, name: string) => {
+    const trimmed = name.trim();
+    setSettings(s => ({
+      ...s,
+      teamMembers: s.teamMembers.map(m =>
+        m.id === id ? { ...m, name: trimmed || m.name } : m
+      )
+    }));
+  };
+  const deleteTeamMember = (id: string) => {
+    setSettings(s => ({
+      ...s,
+      teamMembers: s.teamMembers.filter(m => m.id !== id)
+    }));
+  };
+
   const [sections, setSections] = useState<SectionState>({
     marketing: [
       createBaseTask("Marketing Communication", {
@@ -231,9 +275,13 @@ export const useTasksState = () => {
     const sponsorship = sections.sponsorship;
     const totalSponsorsConfirmed = sponsorship.filter(t => t.pipelineStage === "Confirmed").length;
 
-    const revenueSecured = sponsorship
+    const confirmedDealValueSum = sponsorship
       .filter(t => t.pipelineStage === "Confirmed")
       .reduce((sum, t) => sum + t.dealValue, 0);
+    const revenueSecured = Math.max(
+      0,
+      confirmedDealValueSum + settings.manualRevenueAdjustment
+    );
 
     const pipelineExpectedRevenue = sponsorship.reduce(
       (sum, t) => sum + (t.expectedRevenue ?? (t.dealValue * (t.probability ?? 0)) / 100),
@@ -279,16 +327,23 @@ export const useTasksState = () => {
     return {
       totalSponsorsConfirmed,
       revenueSecured,
-      revenueTarget: REVENUE_TARGET,
+      revenueTarget: settings.revenueTarget,
       pipelineExpectedRevenue,
       upcomingDeadlines,
       highPriorityTasks
     };
-  }, [sections]);
+  }, [sections, settings.revenueTarget, settings.manualRevenueAdjustment]);
 
   return {
     sections,
     summary,
+    settings,
+    setRevenueTarget,
+    setManualRevenueAdjustment,
+    teamMembers: settings.teamMembers,
+    addTeamMember,
+    updateTeamMember,
+    deleteTeamMember,
     upsertTask,
     deleteTask,
     moveTaskInBoard

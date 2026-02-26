@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { TaskSection } from "@/types/tasks";
 
 const SECTIONS: TaskSection[] = [
@@ -11,8 +13,10 @@ const SECTIONS: TaskSection[] = [
   "Sponsorship"
 ];
 
+type NavSection = TaskSection | "Settings";
+
 interface LayoutShellProps {
-  activeSection: TaskSection;
+  activeSection: NavSection;
   onSectionChange: (section: TaskSection) => void;
   children: React.ReactNode;
 }
@@ -22,6 +26,9 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
   onSectionChange,
   children
 }) => {
+  const pathname = usePathname();
+  const isSettingsActive = pathname === "/settings" || activeSection === "Settings";
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Desktop sidebar */}
@@ -42,12 +49,12 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
 
         <nav className="space-y-1">
           {SECTIONS.map(section => {
-            const isActive = activeSection === section;
+            const isActive = !isSettingsActive && activeSection === section;
             return (
               <button
                 key={section}
                 onClick={() => onSectionChange(section)}
-                className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition ${
+                className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm font-medium transition ${
                   isActive
                     ? "bg-accent text-white shadow-sm"
                     : "text-gray-700 hover:bg-gray-100"
@@ -57,6 +64,16 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
               </button>
             );
           })}
+          <Link
+            href="/settings"
+            className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition ${
+              isSettingsActive
+                ? "bg-accent text-white shadow-sm"
+                : "text-gray-700 hover:bg-gray-100"
+            }`}
+          >
+            Settings
+          </Link>
         </nav>
       </aside>
 
@@ -74,7 +91,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
           </div>
           <div className="flex overflow-x-auto border-t border-gray-100">
             {SECTIONS.map(section => {
-              const isActive = activeSection === section;
+              const isActive = !isSettingsActive && activeSection === section;
               return (
                 <button
                   key={section}
@@ -89,6 +106,16 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
                 </button>
               );
             })}
+            <Link
+              href="/settings"
+              className={`whitespace-nowrap px-4 py-2 text-xs font-medium transition ${
+                isSettingsActive
+                  ? "border-b-2 border-accent text-accent"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Settings
+            </Link>
           </div>
         </div>
 

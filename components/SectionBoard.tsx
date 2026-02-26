@@ -15,6 +15,7 @@ import {
   TaskStatus
 } from "@/types/tasks";
 import { useMemo, useState } from "react";
+import type { TeamMember } from "@/lib/settings";
 
 type BoardSection = Exclude<TaskSection, "Dashboard Summary">;
 
@@ -23,6 +24,7 @@ type ViewMode = "kanban" | "table";
 interface SectionBoardProps {
   section: BoardSection;
   tasks: AnyTask[];
+  teamMembers: TeamMember[];
   onUpsertTask: (task: AnyTask) => void;
   onDeleteTask: (task: AnyTask) => void;
   onMoveTask: (
@@ -153,6 +155,7 @@ interface TaskModalProps {
   open: boolean;
   mode: "add" | "edit";
   section: BoardSection;
+  teamMembers: TeamMember[];
   initialTask?: AnyTask | null;
   onClose: () => void;
   onSave: (task: AnyTask) => void;
@@ -163,6 +166,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
   open,
   mode,
   section,
+  teamMembers,
   initialTask,
   onClose,
   onSave,
@@ -321,12 +325,18 @@ const TaskModal: React.FC<TaskModalProps> = ({
               <label className="mb-1 block font-medium text-gray-700">
                 Owner
               </label>
-              <input
+              <select
                 value={owner}
                 onChange={e => setOwner(e.target.value)}
-                className="w-full rounded-md border border-gray-300 px-2.5 py-1.5 text-xs outline-none ring-accent/30 focus:border-accent focus:ring-2"
-                placeholder="Person or team"
-              />
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none ring-accent/30 focus:border-accent focus:ring-2"
+              >
+                <option value="">Unassigned</option>
+                {teamMembers.map(member => (
+                  <option key={member.id} value={member.name}>
+                    {member.name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="mb-1 block font-medium text-gray-700">
@@ -564,6 +574,7 @@ const TaskModal: React.FC<TaskModalProps> = ({
 export const SectionBoard: React.FC<SectionBoardProps> = ({
   section,
   tasks,
+  teamMembers,
   onUpsertTask,
   onDeleteTask,
   onMoveTask
@@ -800,6 +811,7 @@ export const SectionBoard: React.FC<SectionBoardProps> = ({
         open={addOpen}
         mode="add"
         section={section}
+        teamMembers={teamMembers}
         onClose={() => setAddOpen(false)}
         onSave={onUpsertTask}
       />
@@ -808,6 +820,7 @@ export const SectionBoard: React.FC<SectionBoardProps> = ({
         open={!!editingTask}
         mode="edit"
         section={section}
+        teamMembers={teamMembers}
         initialTask={editingTask ?? undefined}
         onClose={() => setEditingTask(null)}
         onSave={onUpsertTask}

@@ -9,7 +9,20 @@ import { AnyTask, TaskSection } from "@/types/tasks";
 
 export default function HomePage() {
   const [activeSection, setActiveSection] = useState<TaskSection>("Dashboard Summary");
-  const { sections, summary, upsertTask, deleteTask, moveTaskInBoard } = useTasksState();
+  const {
+    sections,
+    summary,
+    upsertTask,
+    deleteTask,
+    moveTaskInBoard,
+    settings,
+    setRevenueTarget,
+    setManualRevenueAdjustment,
+    teamMembers,
+    addTeamMember,
+    updateTeamMember,
+    deleteTeamMember
+  } = useTasksState();
 
   const renderSection = () => {
     if (activeSection === "Dashboard Summary") {
@@ -18,6 +31,9 @@ export default function HomePage() {
           totalSponsorsConfirmed={summary.totalSponsorsConfirmed}
           revenueSecured={summary.revenueSecured}
           revenueTarget={summary.revenueTarget}
+          onRevenueTargetChange={setRevenueTarget}
+          manualRevenueAdjustment={settings.manualRevenueAdjustment}
+          onManualRevenueAdjustmentChange={setManualRevenueAdjustment}
           pipelineExpectedRevenue={summary.pipelineExpectedRevenue}
           upcomingDeadlines={summary.upcomingDeadlines}
           highPriorityTasks={summary.highPriorityTasks}
@@ -42,6 +58,7 @@ export default function HomePage() {
         onUpsertTask={upsertTask}
         onDeleteTask={deleteTask}
         onMoveTask={moveTaskInBoard}
+        teamMembers={teamMembers}
       />
     );
   };
