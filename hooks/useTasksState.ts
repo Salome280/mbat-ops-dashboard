@@ -91,6 +91,9 @@ export const useTasksState = () => {
   const setManualRevenueAdjustment = (value: number) => {
     setSettings(s => ({ ...s, manualRevenueAdjustment: value }));
   };
+  const setManualPipelineAdjustment = (value: number) => {
+    setSettings(s => ({ ...s, manualPipelineAdjustment: value }));
+  };
   const addTeamMember = (name: string) => {
     const trimmed = name.trim();
     if (!trimmed) return;
@@ -283,10 +286,11 @@ export const useTasksState = () => {
       confirmedDealValueSum + settings.manualRevenueAdjustment
     );
 
-    const pipelineExpectedRevenue = sponsorship.reduce(
+    const calculatedPipeline = sponsorship.reduce(
       (sum, t) => sum + (t.expectedRevenue ?? (t.dealValue * (t.probability ?? 0)) / 100),
       0
     );
+    const pipelineExpectedRevenue = calculatedPipeline + settings.manualPipelineAdjustment;
 
     const allTasks: AnyTask[] = [
       ...sections.marketing,
@@ -332,7 +336,7 @@ export const useTasksState = () => {
       upcomingDeadlines,
       highPriorityTasks
     };
-  }, [sections, settings.revenueTarget, settings.manualRevenueAdjustment]);
+  }, [sections, settings.revenueTarget, settings.manualRevenueAdjustment, settings.manualPipelineAdjustment]);
 
   return {
     sections,
@@ -340,6 +344,7 @@ export const useTasksState = () => {
     settings,
     setRevenueTarget,
     setManualRevenueAdjustment,
+    setManualPipelineAdjustment,
     teamMembers: settings.teamMembers,
     addTeamMember,
     updateTeamMember,

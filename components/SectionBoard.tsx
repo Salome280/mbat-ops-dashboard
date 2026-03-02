@@ -16,6 +16,8 @@ import {
 } from "@/types/tasks";
 import { useMemo, useState } from "react";
 import type { TeamMember } from "@/lib/settings";
+import { MeetingMinutesPanel } from "./MeetingMinutesPanel";
+import { DocumentsPanel } from "./DocumentsPanel";
 
 type BoardSection = Exclude<TaskSection, "Dashboard Summary">;
 
@@ -806,6 +808,9 @@ export const SectionBoard: React.FC<SectionBoardProps> = ({
           </div>
         </div>
       )}
+
+      <MeetingMinutesPanel section={section} />
+      <DocumentsPanel section={section} />
 
       <TaskModal
         open={addOpen}

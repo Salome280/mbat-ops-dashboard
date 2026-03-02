@@ -10,6 +10,8 @@ interface SummaryProps {
   manualRevenueAdjustment: number;
   onManualRevenueAdjustmentChange: (value: number) => void;
   pipelineExpectedRevenue: number;
+  manualPipelineAdjustment: number;
+  onManualPipelineAdjustmentChange: (value: number) => void;
   upcomingDeadlines: AnyTask[];
   highPriorityTasks: AnyTask[];
 }
@@ -39,6 +41,8 @@ export const SummaryDashboard: React.FC<SummaryProps> = ({
   manualRevenueAdjustment,
   onManualRevenueAdjustmentChange,
   pipelineExpectedRevenue,
+  manualPipelineAdjustment,
+  onManualPipelineAdjustmentChange,
   upcomingDeadlines,
   highPriorityTasks
 }) => {
@@ -120,14 +124,23 @@ export const SummaryDashboard: React.FC<SummaryProps> = ({
           </p>
           <p className="mt-1 text-xs text-gray-500">
             vs target {currency(revenueTarget)}
-            {manualRevenueAdjustment !== 0 && (
-              <span className="ml-1">(adj. {manualRevenueAdjustment >= 0 ? "+" : ""}{manualRevenueAdjustment.toLocaleString()})</span>
+            {manualPipelineAdjustment !== 0 && (
+              <span className="ml-1">(adj: {manualPipelineAdjustment >= 0 ? "+" : ""}{currency(manualPipelineAdjustment)})</span>
             )}
           </p>
           <div className="mt-3 h-1.5 w-full rounded-full bg-gray-100">
             <div
               className="h-1.5 rounded-full bg-emerald-500 transition-all"
               style={{ width: `${pipelinePct}%` }}
+            />
+          </div>
+          <div className="mt-2 flex items-center gap-2">
+            <span className="text-[11px] text-gray-500">Manual pipeline adj:</span>
+            <input
+              type="number"
+              value={manualPipelineAdjustment}
+              onChange={e => onManualPipelineAdjustmentChange(Number(e.target.value) || 0)}
+              className="w-20 rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-xs outline-none focus:border-accent focus:ring-1 focus:ring-accent/30"
             />
           </div>
         </div>

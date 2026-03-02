@@ -11,6 +11,7 @@ export default function SettingsPage() {
     settings,
     setRevenueTarget,
     setManualRevenueAdjustment,
+    setManualPipelineAdjustment,
     teamMembers,
     addTeamMember,
     updateTeamMember,
@@ -89,6 +90,22 @@ export default function SettingsPage() {
               />
               <p className="mt-1 text-[11px] text-gray-500">
                 Added to Revenue Secured. Use negative for deductions.
+              </p>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-gray-700">
+                Manual Pipeline Adjustment
+              </label>
+              <input
+                type="number"
+                value={settings.manualPipelineAdjustment}
+                onChange={e =>
+                  setManualPipelineAdjustment(Number(e.target.value) || 0)
+                }
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none ring-accent/30 focus:border-accent focus:ring-2"
+              />
+              <p className="mt-1 text-[11px] text-gray-500">
+                Added to Pipeline Expected Revenue. Use negative for deductions.
               </p>
             </div>
           </div>

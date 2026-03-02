@@ -18,6 +18,7 @@ export default function HomePage() {
     settings,
     setRevenueTarget,
     setManualRevenueAdjustment,
+    setManualPipelineAdjustment,
     teamMembers,
     addTeamMember,
     updateTeamMember,
@@ -35,6 +36,8 @@ export default function HomePage() {
           manualRevenueAdjustment={settings.manualRevenueAdjustment}
           onManualRevenueAdjustmentChange={setManualRevenueAdjustment}
           pipelineExpectedRevenue={summary.pipelineExpectedRevenue}
+          manualPipelineAdjustment={settings.manualPipelineAdjustment}
+          onManualPipelineAdjustmentChange={setManualPipelineAdjustment}
           upcomingDeadlines={summary.upcomingDeadlines}
           highPriorityTasks={summary.highPriorityTasks}
         />
