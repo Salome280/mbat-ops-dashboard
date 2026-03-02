@@ -25,6 +25,14 @@ export default function HomePage() {
     deleteTeamMember
   } = useTasksState();
 
+  const allTasks = [
+    ...sections.marketing,
+    ...sections.merchandise,
+    ...sections.financeLegal,
+    ...sections.schoolRelationships,
+    ...sections.sponsorship,
+  ];
+
   const renderSection = () => {
     if (activeSection === "Dashboard Summary") {
       return (
@@ -40,6 +48,8 @@ export default function HomePage() {
           onManualPipelineAdjustmentChange={setManualPipelineAdjustment}
           upcomingDeadlines={summary.upcomingDeadlines}
           highPriorityTasks={summary.highPriorityTasks}
+          sponsorshipTasks={sections.sponsorship}
+          allTasks={allTasks}
         />
       );
     }

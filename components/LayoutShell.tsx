@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { TaskSection } from "@/types/tasks";
@@ -34,10 +35,15 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
       {/* Desktop sidebar */}
       <aside className="hidden w-64 flex-col border-r border-gray-200 bg-white px-4 py-6 lg:flex">
         <div className="mb-8">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-white font-semibold">
-              MB
-            </div>
+          <div className="flex items-center gap-3">
+            <Image
+              src="/branding/mbat-logo.jpg"
+              alt="MBAT Logo"
+              width={36}
+              height={36}
+              className="rounded-lg object-cover"
+              priority
+            />
             <div>
               <p className="text-sm font-semibold text-gray-900">
                 MBAT Operations
@@ -82,11 +88,21 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
         {/* Mobile top tabs */}
         <div className="sticky top-0 z-10 border-b border-gray-200 bg-white/80 backdrop-blur lg:hidden">
           <div className="flex items-center justify-between px-4 py-3">
-            <div>
-              <p className="text-base font-semibold text-gray-900">
-                MBAT Operations
-              </p>
-              <p className="text-xs text-gray-500">Internal dashboard</p>
+            <div className="flex items-center gap-3">
+              <Image
+                src="/branding/mbat-logo.jpg"
+                alt="MBAT Logo"
+                width={32}
+                height={32}
+                className="rounded-lg object-cover"
+                priority
+              />
+              <div>
+                <p className="text-base font-semibold text-gray-900">
+                  MBAT Operations
+                </p>
+                <p className="text-xs text-gray-500">Internal dashboard</p>
+              </div>
             </div>
           </div>
           <div className="flex overflow-x-auto border-t border-gray-100">
