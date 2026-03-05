@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AnyTask,
   CommonTask,
@@ -8,7 +8,7 @@ import {
   TaskSection,
   TaskStatus
 } from "@/types/tasks";
-import { defaultSettings, STORAGE_KEY, type DashboardSettings } from "@/lib/settings";
+import { defaultSettings, STORAGE_KEY, TASKS_STORAGE_KEY, type DashboardSettings } from "@/lib/settings";
 import { loadFromStorage, saveToStorage } from "@/lib/storage";
 
 export type SectionKey =
@@ -73,8 +73,50 @@ const createBaseTask = (
   return c;
 };
 
+const getDefaultSections = (): SectionState => ({
+  marketing: [
+    createBaseTask("Marketing Communication", {
+      title: "Finalize MBAT email campaign",
+      description: "Send final schedule and logistics email to all participants.",
+      owner: "Comms Team",
+      status: "In Progress",
+      priority: "High"
+    }) as CommonTask
+  ],
+  merchandise: [],
+  financeLegal: [],
+  schoolRelationships: [],
+  sponsorship: [
+    createBaseTask("Sponsorship", {
+      title: "Secure renewal with Main Sponsor",
+      company: "ACME Corp",
+      contactName: "Jane Doe",
+      pipelineStage: "Negotiating",
+      dealValue: 50_000,
+      probability: 70,
+      expectedRevenue: 35_000,
+      status: "In Progress",
+      priority: "Critical",
+      nextFollowUp: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString()
+    }) as SponsorshipTask,
+    createBaseTask("Sponsorship", {
+      title: "New lead: TechCo",
+      company: "TechCo",
+      contactName: "John Smith",
+      pipelineStage: "Contacted",
+      dealValue: 30_000,
+      probability: 40,
+      expectedRevenue: 12_000,
+      status: "In Progress",
+      priority: "High"
+    }) as SponsorshipTask
+  ]
+});
+
 export const useTasksState = () => {
   const [settings, setSettings] = useState<DashboardSettings>(defaultSettings);
+  const [sections, setSections] = useState<SectionState>(getDefaultSections);
+  const hasLoadedTasks = useRef(false);
 
   useEffect(() => {
     const loaded = loadFromStorage(STORAGE_KEY, defaultSettings);
@@ -82,8 +124,19 @@ export const useTasksState = () => {
   }, []);
 
   useEffect(() => {
+    const loaded = loadFromStorage(TASKS_STORAGE_KEY, getDefaultSections());
+    setSections(loaded as SectionState);
+    hasLoadedTasks.current = true;
+  }, []);
+
+  useEffect(() => {
     saveToStorage(STORAGE_KEY, settings);
   }, [settings]);
+
+  useEffect(() => {
+    if (!hasLoadedTasks.current) return;
+    saveToStorage(TASKS_STORAGE_KEY, sections);
+  }, [sections]);
 
   const setRevenueTarget = (value: number) => {
     setSettings(s => ({ ...s, revenueTarget: value }));
@@ -123,46 +176,6 @@ export const useTasksState = () => {
       teamMembers: s.teamMembers.filter(m => m.id !== id)
     }));
   };
-
-  const [sections, setSections] = useState<SectionState>({
-    marketing: [
-      createBaseTask("Marketing Communication", {
-        title: "Finalize MBAT email campaign",
-        description: "Send final schedule and logistics email to all participants.",
-        owner: "Comms Team",
-        status: "In Progress",
-        priority: "High"
-      }) as CommonTask
-    ],
-    merchandise: [],
-    financeLegal: [],
-    schoolRelationships: [],
-    sponsorship: [
-      createBaseTask("Sponsorship", {
-        title: "Secure renewal with Main Sponsor",
-        company: "ACME Corp",
-        contactName: "Jane Doe",
-        pipelineStage: "Negotiating",
-        dealValue: 50_000,
-        probability: 70,
-        expectedRevenue: 35_000,
-        status: "In Progress",
-        priority: "Critical",
-        nextFollowUp: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString()
-      }) as SponsorshipTask,
-      createBaseTask("Sponsorship", {
-        title: "New lead: TechCo",
-        company: "TechCo",
-        contactName: "John Smith",
-        pipelineStage: "Contacted",
-        dealValue: 30_000,
-        probability: 40,
-        expectedRevenue: 12_000,
-        status: "In Progress",
-        priority: "High"
-      }) as SponsorshipTask
-    ]
-  });
 
   const upsertTask = (task: AnyTask) => {
     setSections(prev => {

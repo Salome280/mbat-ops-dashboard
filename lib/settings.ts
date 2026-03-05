@@ -9,6 +9,7 @@ export type DashboardSettings = {
 };
 
 export const STORAGE_KEY = "mbat_settings_v1";
+export const TASKS_STORAGE_KEY = "mbat_tasks_v1";
 
 export const defaultSettings: DashboardSettings = {
   revenueTarget: 850_000,
