@@ -78,7 +78,7 @@ export const useTasksState = () => {
 
   useEffect(() => {
     const loaded = loadFromStorage(STORAGE_KEY, defaultSettings);
-    setSettings(loaded);
+    setSettings({ ...defaultSettings, ...loaded } as DashboardSettings);
   }, []);
 
   useEffect(() => {
@@ -93,6 +93,9 @@ export const useTasksState = () => {
   };
   const setManualPipelineAdjustment = (value: number) => {
     setSettings(s => ({ ...s, manualPipelineAdjustment: value }));
+  };
+  const setManualSponsorsConfirmedOverride = (value: number | null) => {
+    setSettings(s => ({ ...s, manualSponsorsConfirmedOverride: value }));
   };
   const addTeamMember = (name: string) => {
     const trimmed = name.trim();
@@ -345,6 +348,7 @@ export const useTasksState = () => {
     setRevenueTarget,
     setManualRevenueAdjustment,
     setManualPipelineAdjustment,
+    setManualSponsorsConfirmedOverride,
     teamMembers: settings.teamMembers,
     addTeamMember,
     updateTeamMember,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { AnyTask, SponsorshipTask } from "@/types/tasks";
 import { RevenueLineChart } from "@/components/charts/RevenueLineChart";
 import { PipelineStageBar } from "@/components/charts/PipelineStageBar";
@@ -15,6 +15,8 @@ import {
 
 interface SummaryProps {
   totalSponsorsConfirmed: number;
+  manualSponsorsConfirmedOverride: number | null;
+  onManualSponsorsConfirmedOverrideChange: (value: number | null) => void;
   revenueSecured: number;
   revenueTarget: number;
   onRevenueTargetChange: (value: number) => void;
@@ -72,6 +74,8 @@ const DeltaBadge: React.FC<{ delta: KpiDelta }> = ({ delta }) => {
 
 export const SummaryDashboard: React.FC<SummaryProps> = ({
   totalSponsorsConfirmed,
+  manualSponsorsConfirmedOverride,
+  onManualSponsorsConfirmedOverrideChange,
   revenueSecured,
   revenueTarget,
   onRevenueTargetChange,
@@ -112,6 +116,10 @@ export const SummaryDashboard: React.FC<SummaryProps> = ({
     [allTasks]
   );
 
+  const [editingSponsors, setEditingSponsors] = useState(false);
+  const sponsorsDisplay =
+    manualSponsorsConfirmedOverride ?? totalSponsorsConfirmed;
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -128,12 +136,67 @@ export const SummaryDashboard: React.FC<SummaryProps> = ({
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {/* Sponsors Confirmed */}
         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-md">
-          <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
-            Sponsors Confirmed
-          </p>
-          <p className="mt-3 text-3xl font-semibold text-gray-900">
-            {totalSponsorsConfirmed}
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+              Sponsors Confirmed
+            </p>
+            <button
+              type="button"
+              onClick={() => setEditingSponsors(true)}
+              className="rounded p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
+              aria-label="Edit sponsors confirmed"
+            >
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                />
+              </svg>
+            </button>
+          </div>
+          {editingSponsors ? (
+            <div className="mt-2 flex items-center gap-2">
+              <input
+                type="number"
+                min={0}
+                value={sponsorsDisplay}
+                onChange={(e) =>
+                  onManualSponsorsConfirmedOverrideChange(
+                    e.target.value === "" ? null : parseInt(e.target.value, 10) || 0
+                  )
+                }
+                onBlur={() => setEditingSponsors(false)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") setEditingSponsors(false);
+                }}
+                className="w-20 rounded border border-gray-200 bg-gray-50 px-2 py-1.5 text-2xl font-semibold outline-none focus:border-accent focus:ring-1 focus:ring-accent/30"
+                autoFocus
+              />
+              {manualSponsorsConfirmedOverride !== null && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onManualSponsorsConfirmedOverrideChange(null);
+                    setEditingSponsors(false);
+                  }}
+                  className="text-[11px] text-gray-500 underline hover:text-gray-700"
+                >
+                  Use actual
+                </button>
+              )}
+            </div>
+          ) : (
+            <p className="mt-3 text-3xl font-semibold text-gray-900">
+              {sponsorsDisplay}
+            </p>
+          )}
           <DeltaBadge delta={deltas.sponsorsConfirmed} />
         </div>
 
@@ -206,7 +269,7 @@ export const SummaryDashboard: React.FC<SummaryProps> = ({
               style={{ width: `${pipelinePct}%` }}
             />
           </div>
-          <div className="mt-2 flex items-center gap-2">
+          <div className="mt-2 flex flex-wrap items-center gap-2">
             <span className="text-[11px] text-gray-400">
               Manual pipeline adj:
             </span>
@@ -218,6 +281,13 @@ export const SummaryDashboard: React.FC<SummaryProps> = ({
               }
               className="w-20 rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-xs outline-none focus:border-accent focus:ring-1 focus:ring-accent/30"
             />
+            <button
+              type="button"
+              onClick={() => onManualPipelineAdjustmentChange(0)}
+              className="rounded border border-gray-200 bg-gray-50 px-2 py-0.5 text-[11px] text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
+            >
+              Reset to 0
+            </button>
           </div>
         </div>
 

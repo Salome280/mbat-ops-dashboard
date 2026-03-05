@@ -19,6 +19,7 @@ export default function HomePage() {
     setRevenueTarget,
     setManualRevenueAdjustment,
     setManualPipelineAdjustment,
+    setManualSponsorsConfirmedOverride,
     teamMembers,
     addTeamMember,
     updateTeamMember,
@@ -38,6 +39,8 @@ export default function HomePage() {
       return (
         <SummaryDashboard
           totalSponsorsConfirmed={summary.totalSponsorsConfirmed}
+          manualSponsorsConfirmedOverride={settings.manualSponsorsConfirmedOverride}
+          onManualSponsorsConfirmedOverrideChange={setManualSponsorsConfirmedOverride}
           revenueSecured={summary.revenueSecured}
           revenueTarget={summary.revenueTarget}
           onRevenueTargetChange={setRevenueTarget}
