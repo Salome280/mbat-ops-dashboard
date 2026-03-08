@@ -8,7 +8,8 @@ export type TaskSection =
   | "Merchandise"
   | "Finance and Legal"
   | "School Relationships"
-  | "Sponsorship";
+  | "Sponsorship"
+  | "Other";
 
 export interface CommonTask {
   id: string;

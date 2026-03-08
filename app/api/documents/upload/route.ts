@@ -8,7 +8,8 @@ const VALID_SECTIONS = [
   "Merchandise",
   "Finance and Legal",
   "School Relationships",
-  "Sponsorship"
+  "Sponsorship",
+  "Other"
 ];
 
 function sanitize(name: string): string {

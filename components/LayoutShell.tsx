@@ -11,7 +11,8 @@ const SECTIONS: TaskSection[] = [
   "Merchandise",
   "Finance and Legal",
   "School Relationships",
-  "Sponsorship"
+  "Sponsorship",
+  "Other"
 ];
 
 type NavSection = TaskSection | "Settings";

@@ -16,7 +16,8 @@ export type SectionKey =
   | "merchandise"
   | "financeLegal"
   | "schoolRelationships"
-  | "sponsorship";
+  | "sponsorship"
+  | "other";
 
 export type SectionState = {
   marketing: CommonTask[];
@@ -24,6 +25,7 @@ export type SectionState = {
   financeLegal: CommonTask[];
   schoolRelationships: CommonTask[];
   sponsorship: SponsorshipTask[];
+  other: CommonTask[];
 };
 
 const nowIso = () => new Date().toISOString();
@@ -86,6 +88,7 @@ const getDefaultSections = (): SectionState => ({
   merchandise: [],
   financeLegal: [],
   schoolRelationships: [],
+  other: [],
   sponsorship: [
     createBaseTask("Sponsorship", {
       title: "Secure renewal with Main Sponsor",
@@ -124,8 +127,9 @@ export const useTasksState = () => {
   }, []);
 
   useEffect(() => {
-    const loaded = loadFromStorage(TASKS_STORAGE_KEY, getDefaultSections());
-    setSections(loaded as SectionState);
+    const defaultSections = getDefaultSections();
+    const loaded = loadFromStorage(TASKS_STORAGE_KEY, defaultSections);
+    setSections({ ...defaultSections, ...loaded } as SectionState);
     hasLoadedTasks.current = true;
   }, []);
 
@@ -184,7 +188,8 @@ export const useTasksState = () => {
         merchandise: [...prev.merchandise],
         financeLegal: [...prev.financeLegal],
         schoolRelationships: [...prev.schoolRelationships],
-        sponsorship: [...prev.sponsorship]
+        sponsorship: [...prev.sponsorship],
+        other: [...prev.other]
       };
 
       const updateArray = (arr: AnyTask[]): AnyTask[] => {
@@ -210,6 +215,9 @@ export const useTasksState = () => {
           break;
         case "Sponsorship":
           copy.sponsorship = updateArray(copy.sponsorship) as SponsorshipTask[];
+          break;
+        case "Other":
+          copy.other = updateArray(copy.other) as CommonTask[];
           break;
       }
 
@@ -240,7 +248,11 @@ export const useTasksState = () => {
         sponsorship:
           task.section === "Sponsorship"
             ? (filter(prev.sponsorship) as SponsorshipTask[])
-            : prev.sponsorship
+            : prev.sponsorship,
+        other:
+          task.section === "Other"
+            ? (filter(prev.other) as CommonTask[])
+            : prev.other
       };
     });
   };
@@ -256,7 +268,8 @@ export const useTasksState = () => {
         merchandise: [...prev.merchandise],
         financeLegal: [...prev.financeLegal],
         schoolRelationships: [...prev.schoolRelationships],
-        sponsorship: [...prev.sponsorship]
+        sponsorship: [...prev.sponsorship],
+        other: [...prev.other]
       };
 
       const updateForArray = <T extends AnyTask>(arr: T[], update: (task: T) => T): T[] =>
@@ -282,6 +295,9 @@ export const useTasksState = () => {
             break;
           case "School Relationships":
             copy.schoolRelationships = updateForArray(copy.schoolRelationships, t => ({ ...t, status, updatedAt: nowIso() })) as CommonTask[];
+            break;
+          case "Other":
+            copy.other = updateForArray(copy.other, t => ({ ...t, status, updatedAt: nowIso() })) as CommonTask[];
             break;
         }
       }
@@ -313,7 +329,8 @@ export const useTasksState = () => {
       ...sections.merchandise,
       ...sections.financeLegal,
       ...sections.schoolRelationships,
-      ...sections.sponsorship
+      ...sections.sponsorship,
+      ...sections.other
     ];
 
     const now = new Date();

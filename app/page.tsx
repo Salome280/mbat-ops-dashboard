@@ -32,6 +32,7 @@ export default function HomePage() {
     ...sections.financeLegal,
     ...sections.schoolRelationships,
     ...sections.sponsorship,
+    ...sections.other,
   ];
 
   const renderSection = () => {
@@ -62,7 +63,8 @@ export default function HomePage() {
       Merchandise: sections.merchandise,
       "Finance and Legal": sections.financeLegal,
       "School Relationships": sections.schoolRelationships,
-      Sponsorship: sections.sponsorship
+      Sponsorship: sections.sponsorship,
+      Other: sections.other
     };
 
     const tasks = map[activeSection as Exclude<TaskSection, "Dashboard Summary">];
